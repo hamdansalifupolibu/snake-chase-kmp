@@ -33,7 +33,7 @@ Snake Chase started on my dad's Nokia "yam phone", as we call it in Ghana. I los
 was 13, and that game is one of the memories I still have of him. Snake was the first phone game
 for millions of people, and I wanted to bring it back on the devices we use today. So I turned it around: you are the food. Built with Kotlin Multiplatform and Compose
 Multiplatform by **Hamdan Salifu Polibu**, University of Mines and Technology, Ghana.
-[Read the full essay →](docs/ESSAY.md)
+[Read the full essay →](docs/ESSAY.md) · [How it was built, step by step →](docs/DEVLOG.md)
 
 ## One codebase, three platforms
 
