@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#0E1030">
+    <meta name="description" content="Snake Chase — a Kotlin Multiplatform survival game. Play live duels against phone and desktop players.">
+    <title>Snake Chase</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        @font-face {
+            font-family: "Lilita One";
+            src: url("composeResources/snakechase.composeapp.generated.resources/font/lilita_one.ttf") format("truetype");
+            font-display: swap;
+        }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0E1030; }
+        #loading { position: fixed; inset: 0; z-index: 10; transition: opacity 0.6s ease; }
+        #loading.out { opacity: 0; pointer-events: none; }
+        #loading canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        #loading .ui {
+            position: absolute; left: 0; right: 0; top: 9vh; text-align: center; pointer-events: none;
+            font-family: "Lilita One", system-ui, sans-serif;
+        }
+        #loading .logo {
+            font-size: clamp(40px, 8.5vw, 92px); letter-spacing: 0.02em; line-height: 1;
+            background: linear-gradient(180deg, #E6FF8F 0%, #C8F560 45%, #FFD23F 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            -webkit-text-stroke: clamp(2px, 0.5vw, 5px) #0E1F17;
+            filter: drop-shadow(0 clamp(3px, 0.6vw, 6px) 0 #0E1F17) drop-shadow(0 0 22px rgba(200, 245, 96, 0.35));
+        }
+        #loading .tag {
+            margin-top: 10px; color: #9FD0FF; font: 700 clamp(11px, 1.4vw, 14px) system-ui, sans-serif;
+            letter-spacing: 0.32em; text-transform: uppercase; opacity: 0.85;
+        }
+        #loading .pct {
+            position: absolute; left: 0; right: 0; bottom: 4vh; text-align: center; pointer-events: none;
+            font-family: "Lilita One", system-ui, sans-serif; font-size: clamp(22px, 3.2vw, 34px);
+            color: #E9F6FF; text-shadow: 0 0 16px rgba(79, 168, 255, 0.8), 0 3px 0 #0A1030;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+    <script>
+        // Loading progress 0 -> 100: the game script, then the WebAssembly files (counted byte by
+        // byte as they stream in), then the first frame the game draws.
+        window.__load = { wasm: {} };
+        const realFetch = window.fetch.bind(window);
+        window.fetch = async (input, init) => {
+            const url = typeof input === 'string' ? input : input.url;
+            const res = await realFetch(input, init);
+            if (!url.endsWith('.wasm') || !res.body) return res;
+            // Content-Length is the compressed size; the stream gives unpacked bytes (~3x more).
+            const expected = Number(res.headers.get('content-length') || 0) * (res.headers.get('content-encoding') ? 3.2 : 1) || 4e6;
+            const entry = window.__load.wasm[url] = { got: 0, expected, done: false };
+            const reader = res.body.getReader();
+            const stream = new ReadableStream({
+                async pull(ctrl) {
+                    const { value, done } = await reader.read();
+                    if (done) { entry.done = true; ctrl.close(); return; }
+                    entry.got += value.byteLength;
+                    ctrl.enqueue(value);
+                }
+            });
+            return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
+        };
+    </script>
+    <script type="application/javascript" src="composeApp.js" defer></script>
+</head>
+<body>
+    <div id="loading">
+        <canvas id="scene"></canvas>
+        <div class="ui">
+            <div class="logo">Snake Chase</div>
+            <div class="tag">Kotlin Multiplatform</div>
+        </div>
+        <div class="pct" id="pct">0%</div>
+    </div>
+    <script>
+    // The loading screen is a little scene from the game: under a sunset sky, the glowing snake
+    // chases the food orb across the neon arena floor. The snake grows a bead for every few
+    // percent loaded; at 100% it catches the orb, and the game fades in.
+    (() => {
+        const loader = document.getElementById('loading');
+        const canvas = document.getElementById('scene');
+        const pctEl = document.getElementById('pct');
+        const ctx = canvas.getContext('2d');
+        const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let W = 0, H = 0, dpr = 1;
+        const resize = () => {
+            dpr = Math.min(2, window.devicePixelRatio || 1);
+            W = innerWidth; H = innerHeight;
+            canvas.width = W * dpr; canvas.height = H * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        resize(); addEventListener('resize', resize);
+
+        // ---- progress -------------------------------------------------------------------
+        let shown = 0, finished = false, caughtAt = 0;
+        // ?loaderPreview=40 holds the scene at 40% (for checking the design); normal visits never set it.
+        const preview = new URLSearchParams(location.search).get('loaderPreview');
+        const target = () => {
+            if (preview !== null) return Number(preview);
+            if (finished) return 100;
+            let t = document.readyState === 'complete' ? 12 : 4;
+            const files = Object.values(window.__load.wasm);
+            if (files.length) {
+                const got = files.reduce((s, f) => s + (f.done ? f.expected : Math.min(f.got, f.expected)), 0);
+                const exp = files.reduce((s, f) => s + f.expected, 0);
+                t = 12 + 78 * Math.min(1, got / exp) * (files.length >= 2 ? 1 : 0.5);
+                if (files.length >= 2 && files.every(f => f.done)) t = 94;
+            }
+            return t;
+        };
+        new MutationObserver((_, obs) => {
+            if (preview === null && document.querySelector('body > canvas, canvas:not(#scene)')) { finished = true; obs.disconnect(); }
+        }).observe(document.documentElement, { childList: true, subtree: true });
+
+        // ---- scenery (seeded, so it looks the same every visit) --------------------------
+        let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+        const ridge = (n, amp) => Array.from({ length: n + 1 }, (_, i) => [i / n, rnd() * amp]);
+        const far = ridge(16, 0.10), near = ridge(11, 0.16);
+        const flies = Array.from({ length: 34 }, () => ({ x: rnd(), y: 0.35 + rnd() * 0.6, r: 0.6 + rnd() * 1.8, p: rnd() * 6.28, s: 0.2 + rnd() * 0.6 }));
+        const lanterns = [0.08, 0.17, 0.29, 0.71, 0.82, 0.93].map(x => [x, rnd() * 6.28]);
+        const stars = Array.from({ length: 70 }, () => ({ x: rnd(), y: rnd() * 0.42, r: rnd() * 1.2 + 0.2, p: rnd() * 6.28 }));
+
+        const glow = (x, y, r, color, a) => {
+            const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+            g.addColorStop(0, color.replace('A', a)); g.addColorStop(1, color.replace('A', 0));
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+        };
+
+        const drawSky = (t) => {
+            const horizon = H * 0.56;
+            const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+            sky.addColorStop(0, '#0B0A26'); sky.addColorStop(0.55, '#2A1B55'); sky.addColorStop(0.85, '#8A3A5E'); sky.addColorStop(1, '#F08A4B');
+            ctx.fillStyle = sky; ctx.fillRect(0, 0, W, horizon + 2);
+            for (const s of stars) {
+                ctx.globalAlpha = 0.35 + 0.35 * Math.sin(t * 1.3 + s.p);
+                ctx.fillStyle = '#E9F6FF'; ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, 6.2832); ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            // The setting sun, as in the painting.
+            const sx = W * 0.5, sy = horizon - H * 0.1;
+            glow(sx, sy, H * 0.5, 'rgba(255,140,80,A)', 0.4);
+            glow(sx, sy, H * 0.1, 'rgba(255,214,150,A)', 0.95);
+            ctx.fillStyle = '#FFE3B0'; ctx.beginPath(); ctx.arc(sx, sy, H * 0.035, 0, 6.2832); ctx.fill();
+            const mountains = (pts, base, color) => {
+                ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, horizon + 2);
+                for (const [x, h] of pts) ctx.lineTo(x * W, base - h * H);
+                ctx.lineTo(W, horizon + 2); ctx.closePath(); ctx.fill();
+            };
+            mountains(far, horizon - H * 0.02, '#3B2550');
+            mountains(near, horizon + 1, '#1C1436');
+            // Lanterns along the far terrace, flickering like the ones in the painting.
+            for (const [lx, lp] of lanterns) {
+                const fl = 0.75 + 0.25 * Math.sin(t * 7 + lp) * Math.sin(t * 3.1 + lp * 2);
+                glow(lx * W, horizon - H * 0.012, H * 0.035, 'rgba(255,170,80,A)', 0.55 * fl);
+                ctx.fillStyle = `rgba(255,214,150,${0.9 * fl})`;
+                ctx.beginPath(); ctx.arc(lx * W, horizon - H * 0.012, Math.max(1.6, H * 0.0035), 0, 6.2832); ctx.fill();
+            }
+            // Mist on the horizon.
+            const mist = ctx.createLinearGradient(0, horizon - H * 0.05, 0, horizon + H * 0.02);
+            mist.addColorStop(0, 'rgba(240,138,75,0)'); mist.addColorStop(1, 'rgba(120,80,160,0.35)');
+            ctx.fillStyle = mist; ctx.fillRect(0, horizon - H * 0.05, W, H * 0.07);
+        };
+
+        const drawFloor = (t) => {
+            const horizon = H * 0.56;
+            const floor = ctx.createLinearGradient(0, horizon, 0, H);
+            floor.addColorStop(0, '#120F33'); floor.addColorStop(1, '#05061A');
+            ctx.fillStyle = floor; ctx.fillRect(0, horizon, W, H - horizon);
+            // Sunset reflected on the wet stone.
+            glow(W * 0.5, horizon + H * 0.02, H * 0.3, 'rgba(240,138,75,A)', 0.16);
+            ctx.save(); ctx.beginPath(); ctx.rect(0, horizon, W, H - horizon); ctx.clip();
+            ctx.strokeStyle = 'rgba(79,168,255,0.35)'; ctx.lineWidth = 1;
+            const vx = W * 0.5;
+            for (let i = -14; i <= 14; i++) {      // lines running to the vanishing point
+                ctx.beginPath(); ctx.moveTo(vx + i * W * 0.012, horizon); ctx.lineTo(vx + i * W * 0.16, H); ctx.stroke();
+            }
+            const scroll = calm ? 0 : (t * 0.35) % 1;  // cross lines roll toward you
+            for (let k = 0; k < 14; k++) {
+                const z = (k + scroll) / 14;
+                const y = horizon + (H - horizon) * z * z;
+                ctx.globalAlpha = 0.15 + 0.6 * z;
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+            }
+            ctx.globalAlpha = 1; ctx.restore();
+        };
+
+        const drawFlies = (t) => {
+            for (const f of flies) {
+                const x = (f.x * W + Math.sin(t * f.s + f.p) * 30) % W;
+                const y = f.y * H + Math.cos(t * f.s * 1.3 + f.p) * 16;
+                const a = 0.35 + 0.45 * Math.sin(t * 2 + f.p);
+                glow(x, y, f.r * 6, 'rgba(180,120,255,A)', a * 0.5);
+                ctx.fillStyle = `rgba(230,210,255,${a})`; ctx.beginPath(); ctx.arc(x, y, f.r, 0, 6.2832); ctx.fill();
+            }
+        };
+
+        // ---- the chase: the snake grows with the progress ---------------------------------
+        const MAX_BEADS = 22;
+        const path = (u, t) => {           // a lazy S across the floor
+            if (H > W * 1.15) {               // portrait phone: the chase climbs up the screen
+                return [W * (0.12 + 0.76 * u) + Math.sin(u * 7 + t * 2.2) * W * 0.07, H * (0.9 - 0.24 * u)];
+            }
+            const y0 = H * 0.79;
+            return [W * (0.1 + 0.8 * u), y0 + Math.sin(u * 7 + t * 2.2) * H * 0.045];
+        };
+        const drawChase = (t, p) => {
+            const S = Math.max(1, Math.min(W, H) / 520);     // bigger snake on bigger screens
+            const lunge = caughtAt ? Math.min(1, (performance.now() - caughtAt) / 450) : 0;
+            const headU = 0.16 + 0.58 * (p / 100) + 0.1 * lunge;
+            const beads = 1 + Math.round((MAX_BEADS - 1) * (p / 100));
+            const spacing = 0.022;
+            const orbU = Math.min(0.92, headU + 0.1 - 0.1 * lunge);
+            const [ox, oy] = path(orbU, t);
+            if (!caughtAt || lunge < 1) {
+                // The food orb, with its soft halo ring and bob.
+                const bob = Math.sin(t * 3) * 4;
+                glow(ox, oy + bob, 46 * S, 'rgba(79,168,255,A)', 0.45);
+                ctx.strokeStyle = 'rgba(111,198,255,0.4)'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.arc(ox, oy + bob, 22 * S, 0, 6.2832); ctx.stroke();
+                glow(ox, oy + bob, 14 * S, 'rgba(160,230,255,A)', 0.9);
+                ctx.fillStyle = '#E9FBFF'; ctx.beginPath(); ctx.arc(ox, oy + bob, 6 * S, 0, 6.2832); ctx.fill();
+            }
+            // Thin light trail, then the beads from tail to head.
+            const pts = [];
+            for (let i = beads - 1; i >= 0; i--) pts.push(path(Math.max(0.02, headU - i * spacing), t));
+            ctx.strokeStyle = 'rgba(111,198,255,0.55)'; ctx.lineWidth = 2 * S; ctx.lineJoin = 'round';
+            ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+            pts.forEach(([x, y], i) => {
+                const last = i === pts.length - 1;
+                const r = (last ? 15 : 5 + 7 * (i / Math.max(1, pts.length - 1))) * S;
+                const pulse = 0.75 + 0.25 * Math.sin(t * 6 - i * 0.5);
+                glow(x, y, r * 3, 'rgba(47,107,255,A)', 0.55 * pulse);
+                const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, 0, x, y, r * 1.2);
+                g.addColorStop(0, '#E9F6FF'); g.addColorStop(0.5, '#4FA8FF'); g.addColorStop(1, '#1A3DFF');
+                ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+                if (last) {   // two white eyes, looking at the orb
+                    for (const d of [-5, 5]) {
+                        ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x + d * S, y - 2 * S, 4.2 * S, 0, 6.2832); ctx.fill();
+                        ctx.fillStyle = '#0A1030'; ctx.beginPath(); ctx.arc(x + (d + 1.4) * S, y - 1.6 * S, 2.1 * S, 0, 6.2832); ctx.fill();
+                    }
+                }
+            });
+            if (caughtAt) {      // the catch: a burst of light
+                const k = Math.min(1, (performance.now() - caughtAt) / 600);
+                glow(ox, oy, 60 + 220 * k, 'rgba(200,235,255,A)', 0.8 * (1 - k));
+            }
+        };
+
+        const start = performance.now();
+        const frame = (now) => {
+            const t = calm ? 0 : (now - start) / 1000;
+            const goal = target();
+            shown += (goal - shown) * (finished ? 0.2 : 0.07);
+            if (!finished && shown > goal) shown = goal;
+            const p = Math.min(100, shown);
+            ctx.clearRect(0, 0, W, H);
+            drawSky(t); drawFloor(t); drawFlies(t); drawChase(t, p);
+            pctEl.textContent = Math.round(p) + '%';
+            if (finished && p > 99.5 && !caughtAt) caughtAt = performance.now();
+            if (caughtAt && performance.now() - caughtAt > 650) {
+                loader.classList.add('out');
+                setTimeout(() => loader.remove(), 650);
+                return;
+            }
+            requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+    })();
+    </script>
+</body>
+</html>

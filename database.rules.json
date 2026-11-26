@@ -1,0 +1,65 @@
+{
+  "rules": {
+    "ping": { ".read": true, ".write": false },
+
+    "rooms": {
+      "$code": {
+        ".write": "auth != null && !newData.exists() && (data.child('meta/hostUid').val() === auth.uid || root.child('roomIndex/' + $code).val() < now - 600000)",
+
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists() && newData.child('hostUid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['hostUid', 'hostName', 'createdAt']) && newData.child('hostName').isString() && newData.child('hostName').val().length <= 24"
+        },
+
+        "guestUid": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists() && newData.val() === auth.uid && root.child('rooms/' + $code + '/meta').exists() && root.child('rooms/' + $code + '/meta/hostUid').val() !== auth.uid"
+        },
+
+        "watchers": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid",
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          }
+        },
+
+        "toGuest": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid",
+          "events": { "$e": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
+          "state": { ".validate": "newData.isString() && newData.val().length <= 4000" }
+        },
+
+        "toHost": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid",
+          ".write": "auth != null && root.child('rooms/' + $code + '/guestUid').val() === auth.uid",
+          "events": { "$e": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
+          "input": { ".validate": "newData.isString() && newData.val().length <= 1000" }
+        }
+      }
+    },
+
+    "roomIndex": {
+      ".read": "auth != null",
+      ".indexOn": ".value",
+      "$code": {
+        ".write": "auth != null && (root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid || (!newData.exists() && data.val() < now - 600000))",
+        ".validate": "newData.isNumber() && newData.val() <= now"
+      }
+    },
+
+    "queue": {
+      "$tier": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && ($uid === auth.uid || (!newData.exists() && data.child('ts').val() < now - 300000))",
+          "offer": {
+            ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && $uid < auth.uid) || (data.exists() && (data.child('from').val() === auth.uid || $uid === auth.uid)))"
+          }
+        }
+      }
+    }
+  }
+}

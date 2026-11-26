@@ -1,0 +1,34 @@
+*.iml
+.gradle
+/build
+!/build.gradle.kts
+!/settings.gradle.kts
+.idea
+*.log
+.DS_Store
+/local.properties
+/composeApp/build
+/iosApp/iosApp.xcodeproj/project.xcworkspace
+/iosApp/iosApp.xcodeproj/xcuserdata
+.kotlin
+/*.png
+
+# Built binaries (attach to GitHub Releases instead)
+/releases/
+# Original web (JS) version, kept locally for reference only
+/Origional web Snake chase/
+# Firebase CLI cache
+.firebase/
+# Local AI-assistant / tool settings (machine-specific paths)
+.claude/
+
+# Internal planning notes (not part of the submission)
+/PROJECT_HANDOVER_AND_WINNING_BLUEPRINT.md
+
+# Screenshots, video script and other submission prep (not part of the repo)
+/submission-kit/
+
+# Signing keys (never commit)
+*.jks
+*.keystore
+keystore.properties

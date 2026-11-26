@@ -1,0 +1,17 @@
+# Code style for the whole project, read by ktlint (`./gradlew ktlintCheck`) and IntelliJ / Android Studio.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_size = 4
+# Kotlin's official coding conventions (https://kotlinlang.org/docs/coding-conventions.html).
+ktlint_code_style = intellij_idea
+# The conventions set no line-length limit; long string literals and Compose modifier chains read better unbroken.
+max_line_length = off
+# Composables are named like types (PascalCase), as the Compose API guidelines require.
+ktlint_function_naming_ignore_when_annotated_with = Composable

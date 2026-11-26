@@ -1,0 +1,101 @@
+rules_version = '2';
+
+// SnakeChase online arena. Paste into Firebase console → Firestore → Rules → Publish.
+// Players are anonymous Firebase users; every write is validated here, never trusted blindly.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    function validName(n) { return n is string && n.size() > 0 && n.size() <= 24; }
+
+    function validRun(r) {
+      return r is map
+        && r.keys().hasOnly(['fleeMs', 'huntMs', 'ghostFlee', 'ghostHunt'])
+        && r.fleeMs is int && r.fleeMs >= 0 && r.fleeMs <= 45000
+        && r.huntMs is int && r.huntMs >= 0 && r.huntMs <= 45000
+        && r.ghostFlee is string && r.ghostFlee.size() <= 6000
+        && r.ghostHunt is string && r.ghostHunt.size() <= 6000;
+    }
+
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+
+    // ── Ghost-duel challenges ────────────────────────────────────────────────
+    match /matches/{matchId} {
+      allow read: if signedIn();
+
+      // Host posts a finished run as an open challenge.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['status', 'tier', 'day', 'hostUid', 'hostName', 'hostRun', 'createdAt'])
+        && request.resource.data.status == 'open'
+        && request.resource.data.hostUid == request.auth.uid
+        && request.resource.data.tier is int && request.resource.data.tier >= 0 && request.resource.data.tier <= 4
+        && request.resource.data.day is int
+        && validName(request.resource.data.hostName)
+        && validRun(request.resource.data.hostRun)
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if signedIn() && (
+        // Claim: an open challenge (or one abandoned for 10+ min) by someone other than the host.
+        (
+          (resource.data.status == 'open'
+            || (resource.data.status == 'claimed'
+                && request.time > resource.data.claimedAt + duration.value(10, 'm')))
+          && resource.data.hostUid != request.auth.uid
+          && changed().hasOnly(['status', 'guestUid', 'guestName', 'claimedAt'])
+          && request.resource.data.status == 'claimed'
+          && request.resource.data.guestUid == request.auth.uid
+          && validName(request.resource.data.guestName)
+          && request.resource.data.claimedAt == request.time
+        )
+        ||
+        // Finish: only the guest who claimed it, once, with a valid run and a real winner.
+        (
+          resource.data.status == 'claimed'
+          && resource.data.guestUid == request.auth.uid
+          && changed().hasOnly(['status', 'guestRun', 'winnerUid', 'finishedAt'])
+          && request.resource.data.status == 'done'
+          && validRun(request.resource.data.guestRun)
+          && request.resource.data.winnerUid in [resource.data.hostUid, resource.data.guestUid]
+          && request.resource.data.finishedAt == request.time
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    // ── Global leaderboard (append-only) ─────────────────────────────────────
+    match /scores/{scoreId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'levelId', 'score', 'survivalMs', 'difficulty', 'createdAt'])
+        && (!('difficulty' in request.resource.data) || request.resource.data.difficulty in ['MODERATE', 'HARD'])
+        && request.resource.data.uid == request.auth.uid
+        && validName(request.resource.data.name)
+        && request.resource.data.levelId is int && request.resource.data.levelId >= 1 && request.resource.data.levelId <= 5
+        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 10000000
+        && request.resource.data.survivalMs is int && request.resource.data.survivalMs >= 0
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // ── Player profiles (name + avatar + duel stats; coins stay on the device) ──
+    match /profiles/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'avatar', 'duelsWon', 'duelsLost', 'bestWinStreak', 'updatedAt'])
+        && validName(request.resource.data.name)
+        && request.resource.data.avatar is int && request.resource.data.avatar >= 0 && request.resource.data.avatar < 16
+        && request.resource.data.duelsWon is int && request.resource.data.duelsWon >= 0
+        && request.resource.data.duelsLost is int && request.resource.data.duelsLost >= 0
+        && request.resource.data.bestWinStreak is int && request.resource.data.bestWinStreak >= 0
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
