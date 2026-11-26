@@ -371,7 +371,8 @@ internal fun DuelArenaView(
 
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 PlayerBadge(state.player2Name, !p1IsSnake)
-                if (allowQuickChat) ArcadeIconButton(ArcadeIcon.Chat, onClick = onToggleQuickChat, fill = Sky, size = 36.dp)
+                // One shared screen in pass and play: nobody to banter with.
+                if (allowQuickChat && state.mode != DuelMode.LOCAL_PASS_AND_PLAY) ArcadeIconButton(ArcadeIcon.Chat, onClick = onToggleQuickChat, fill = Sky, size = 36.dp)
                 if (onPause != null && state.phase == DuelPhase.ROUND_PLAYING && state.pausedBy == null) {
                     ArcadeIconButton(ArcadeIcon.Pause, onClick = onPause, fill = Banana, size = 36.dp)
                 }
@@ -379,21 +380,25 @@ internal fun DuelArenaView(
             }
         }
 
-        // Latest quick-chat message as a speech-bubble sticker.
+        // Latest quick-chat message: a small sticker under the round timer, clear of the play area.
         state.activeChatBubbles.lastOrNull()?.let { chat ->
-            ArcadePanel(fill = Cream, shape = RoundedCornerShape(16.dp), modifier = Modifier.align(Alignment.Center)) {
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ArcadeIconView(ArcadeIcon.Chat, tint = Ink, size = 20.dp)
-                    Text(chat.text, style = displayStyle(18.sp))
+            ArcadePanel(fill = Cream, shape = RoundedCornerShape(14.dp), modifier = Modifier.align(Alignment.TopCenter).padding(top = 76.dp)) {
+                Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    ArcadeIconView(ArcadeIcon.Chat, tint = Ink, size = 16.dp)
+                    Text(chat.text, style = displayStyle(14.sp))
                 }
             }
         }
 
-        // Quick chat picker
-        if (showQuickChat) {
-            ArcadePanel(fill = Jungle, shape = RoundedCornerShape(18.dp), modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 20.dp)) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Quick banter", style = displayStyle(15.sp, Banana))
+        // Quick chat picker: a compact card under the chat button, never a full-width sheet.
+        if (showQuickChat && state.mode != DuelMode.LOCAL_PASS_AND_PLAY) {
+            ArcadePanel(
+                fill = Jungle,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.align(Alignment.TopEnd).padding(top = 60.dp, end = 12.dp).width(220.dp),
+            ) {
+                Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text("Quick banter", style = displayStyle(13.sp, Banana))
                     QUICK_CHAT_PHRASES.forEach { phrase ->
                         ArcadeChip(phrase, fill = Cream, onClick = { onSendQuickChat(phrase, null) }, modifier = Modifier.fillMaxWidth())
                     }
