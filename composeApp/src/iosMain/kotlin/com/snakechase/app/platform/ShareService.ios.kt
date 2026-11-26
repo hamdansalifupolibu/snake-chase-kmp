@@ -16,6 +16,7 @@ import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIImage
 import platform.UIKit.UIViewController
+import platform.UIKit.popoverPresentationController
 
 /** iOS: the standard share sheet (Messages, WhatsApp, Instagram, Save Image...). */
 actual class ShareService {
