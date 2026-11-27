@@ -13,15 +13,19 @@ past it for points, and clear five hand-painted worlds. Or duel a friend live:
 
 ### ▶ Play it now in your browser: **https://snake-chase01.web.app**
 
-<p align="center">
-  <img src="docs/media/play.jpg" width="49%" alt="Crystal Tundra: the orb weaves between snow whirls, frostlings and falling icicles">
-  <img src="docs/media/duel.jpg" width="49%" alt="A 1v1 duel: one player is the snake, the other the orb">
-</p>
-<p align="center">
-  <img src="docs/media/menu.jpg" width="32%" alt="Main menu with the five worlds">
-  <img src="docs/media/shop.jpg" width="32%" alt="Skin shop: every skin has its own effect and ratings">
-  <img src="docs/media/loader.jpg" width="32%" alt="Loading screen: the snake grows as the game loads">
-</p>
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/desktop-tundra-gameplay.jpg" width="100%" alt="Crystal Tundra: you are the glowing orb, and the snake is hunting you"><br><sub><b>Desktop</b> · Crystal Tundra: you are the orb, the snake is hunting you</sub></td>
+    <td width="50%" align="center"><img src="docs/media/desktop-pass-and-play.jpg" width="100%" alt="A 1v1 duel on one screen: one player is the snake, the other the orb"><br><sub><b>Desktop</b> · Pass and play: a 1v1 duel on one screen</sub></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="docs/media/web-loading-screen.jpg" width="100%" alt="Web loading screen: the snake grows as the game loads"><br><sub><b>Web</b> · Loading: the snake grows as the game loads</sub></td>
+    <td width="33%" align="center"><img src="docs/media/desktop-caught-revive.jpg" width="100%" alt="Caught: your score, stars and a heart to revive"><br><sub><b>Desktop</b> · Caught: score, stars and a heart to revive</sub></td>
+    <td width="33%" align="center"><img src="docs/media/desktop-share-card.jpg" width="100%" alt="Share card: your result over the world's painted background"><br><sub><b>Desktop</b> · Share card: your result over the world's art</sub></td>
+  </tr>
+</table>
 
 🎥 **Video demo:** _link added at submission_
 
@@ -48,12 +52,29 @@ layer:
 | **Desktop** | JVM app for Windows, macOS, Linux | ~300 lines: Java Sound, window, clipboard sharing |
 | **iOS** | Shared code compiles for iOS in CI | not one of the submitted platforms; not run on a device |
 
+**The same game on every screen:** web, desktop and Android, from one codebase.
+
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="docs/media/web-home.jpg" width="100%" alt="Home screen in the browser (Kotlin/Wasm)"><br><sub><b>Web</b> · Kotlin/Wasm in the browser</sub></td>
+    <td width="33%" align="center"><img src="docs/media/desktop-home.jpg" width="100%" alt="Home screen in the desktop app (JVM)"><br><sub><b>Desktop</b> · JVM app on Windows</sub></td>
+    <td width="33%" align="center"><img src="docs/media/mobile-home.jpg" width="100%" alt="Home screen on an Android phone"><br><sub><b>Android</b> · native app on a phone</sub></td>
+  </tr>
+</table>
+
 ---
 
 ## Judge's walkthrough (about 10 minutes)
 
 This build is the **judge edition**: every level, skin and hunt is unlocked and the wallet is full,
 on every platform.
+
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/web-tour-judges.jpg" width="100%" alt="The welcome tour points to the judge tools button"><br><sub><b>Web</b> · The welcome tour points judges to their tools</sub></td>
+    <td width="50%" align="center"><img src="docs/media/desktop-judge-tools.jpg" width="100%" alt="Judge tools: jump to any world or stage, god mode, win a level"><br><sub><b>Desktop</b> · Judge tools: any world or stage, god mode, win a level</sub></td>
+  </tr>
+</table>
 
 1. **First look (web, 1 minute).** Open https://snake-chase01.web.app. A short welcome tour explains
    the game and points to the **judge tools** (the scales icon, top-right). Your first run pauses
@@ -114,6 +135,21 @@ on every platform.
 | **Pass and play** | One screen, two players: left half against right half. |
 | **Online arena** | Quick match against a live stranger, or a ghost duel against a real player's recorded run, with coin stakes per world. |
 
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/desktop-duel-modes.jpg" width="100%" alt="The four duel modes: Vs AI rival, Friend invite, Pass and play, Online arena"><br><sub><b>Desktop</b> · The four duel modes</sub></td>
+    <td width="50%" align="center"><img src="docs/media/desktop-vs-ai-rival.jpg" width="100%" alt="Choose your rival: the Wanderer, the Hunter or the Ghost"><br><sub><b>Desktop</b> · Vs AI: the Wanderer, the Hunter or the Ghost</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/web-invite-host.jpg" width="100%" alt="Hosting a room in the browser: share the code"><br><sub><b>Web</b> · Friend invite: host a room and share the code</sub></td>
+    <td width="50%" align="center"><img src="docs/media/mobile-invite-join.jpg" width="100%" alt="Joining that room from an Android phone, or watching it"><br><sub><b>Android</b> · Join that room with the code, or watch it</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/mobile-nearby-no-internet.jpg" width="100%" alt="Nearby, no internet: join the host's IP on the same Wi-Fi"><br><sub><b>Android</b> · Nearby: no internet, same Wi-Fi, join by IP</sub></td>
+    <td width="50%" align="center"><img src="docs/media/mobile-quick-match.jpg" width="100%" alt="Online arena: quick match against a live stranger, or a ghost duel"><br><sub><b>Android</b> · Online arena: quick match or ghost duel</sub></td>
+  </tr>
+</table>
+
 Every live duel has a synced countdown, pause with a 10-second return window, quick chat, rematch,
 **spectators** (watch any room by its code), both players' real skins, and share cards.
 
@@ -134,6 +170,39 @@ Every live duel has a synced countdown, pause with a 10-second return window, qu
 - Settings: music and sound volumes, vibration, difficulty, Ultra particles or battery saver, meme
   roasts on or off, and a full progress reset.
 - Offline-aware: an offline banner, online modes clearly marked, and results queued for upload.
+
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/mobile-orb-skins.jpg" width="100%" alt="Orb skins: each with its own effect and Speed / Dash / Graze ratings"><br><sub><b>Android</b> · Orb skins: Speed / Dash / Graze</sub></td>
+    <td width="50%" align="center"><img src="docs/media/web-snake-skins.jpg" width="100%" alt="Snake skins: Speed / Agility / Reach ratings"><br><sub><b>Web</b> · Snake skins: Speed / Agility / Reach</sub></td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="docs/media/web-world-top-25.jpg" width="100%" alt="Hall of Fame: the live world top 25 from Firebase"><br><sub><b>Web</b> · Hall of Fame: live world top 25</sub></td>
+    <td width="33%" align="center"><img src="docs/media/mobile-settings.jpg" width="100%" alt="Settings: touch or joystick, left or right thumb, volumes, difficulty"><br><sub><b>Android</b> · Settings: joystick on either thumb</sub></td>
+    <td width="33%" align="center"><img src="docs/media/mobile-snake-hunt.jpg" width="100%" alt="Snake Hunt: you are the snake"><br><sub><b>Android</b> · Snake Hunt: you are the snake</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary><b>More screenshots</b></summary>
+<br>
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/web-tour-start.jpg" width="100%" alt="Welcome tour: you're the food"><br><sub><b>Web</b> · Welcome tour: you're the food</sub></td>
+    <td width="50%" align="center"><img src="docs/media/web-tour-steer.jpg" width="100%" alt="Welcome tour: how to steer on your device"><br><sub><b>Web</b> · Welcome tour: how to steer</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/mobile-profile.jpg" width="100%" alt="Player card: coins, duel record, stars and badges"><br><sub><b>Android</b> · Player card: coins, duel record, badges</sub></td>
+    <td width="50%" align="center"><img src="docs/media/desktop-bestiary.jpg" width="100%" alt="Bestiary: the snakes of each world and how to survive them"><br><sub><b>Desktop</b> · Bestiary: each world's snakes and how to survive them</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="docs/media/web-your-bests.jpg" width="100%" alt="Hall of Fame: your bests with each level's world record"><br><sub><b>Web</b> · Your bests next to each level's world record</sub></td>
+    <td width="50%" align="center"><img src="docs/media/desktop-settings.jpg" width="100%" alt="Settings on desktop: mouse, keyboard or joystick"><br><sub><b>Desktop</b> · Settings: mouse, keyboard or joystick</sub></td>
+  </tr>
+</table>
+</details>
 
 ---
 
