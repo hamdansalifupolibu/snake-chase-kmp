@@ -13,6 +13,19 @@ past it for points, and clear five hand-painted worlds. Or duel a friend live:
 
 ### ▶ Play it now in your browser: **https://snake-chase01.web.app**
 
+### 🎥 Watch the 5-minute demo
+
+<p align="center">
+  <a href="https://youtu.be/MijdZmstjFg">
+    <img src="docs/media/video-thumbnail.jpg" width="85%" alt="Snake Chase demo video on YouTube (4:59): click to watch">
+  </a>
+  <br>
+  <sub><b>Click to watch on YouTube</b> (4:59, unlisted) · <a href="https://youtu.be/MijdZmstjFg">youtu.be/MijdZmstjFg</a></sub>
+</p>
+
+> **For the best picture:** the video was uploaded in 4K. If it looks soft, open
+> **⚙ Settings → Quality** in the YouTube player and pick **1080p or higher**.
+
 <table>
   <tr>
     <td width="50%" align="center"><img src="docs/media/desktop-tundra-gameplay.jpg" width="100%" alt="Crystal Tundra: you are the glowing orb, and the snake is hunting you"><br><sub><b>Desktop</b> · Crystal Tundra: you are the orb, the snake is hunting you</sub></td>
@@ -26,8 +39,6 @@ past it for points, and clear five hand-painted worlds. Or duel a friend live:
     <td width="33%" align="center"><img src="docs/media/desktop-share-card.jpg" width="100%" alt="Share card: your result over the world's painted background"><br><sub><b>Desktop</b> · Share card: your result over the world's art</sub></td>
   </tr>
 </table>
-
-🎥 **Video demo:** _link added at submission_
 
 ---
 
@@ -67,7 +78,8 @@ layer:
 ## Judge's walkthrough (about 10 minutes)
 
 This build is the **judge edition**: every level, skin and hunt is unlocked and the wallet is full,
-on every platform.
+on every platform. Short on time? The [5-minute demo video](https://youtu.be/MijdZmstjFg) shows the
+highlights on all three platforms.
 
 <table>
   <tr>
