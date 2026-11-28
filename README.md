@@ -38,12 +38,6 @@ past it for points, and clear five hand-painted worlds. Or duel a friend live:
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="docs/media/desktop-tundra-gameplay.jpg" width="100%" alt="Crystal Tundra: you are the glowing orb, and the snake is hunting you"><br><sub><b>Desktop</b> · Crystal Tundra: you are the orb, the snake is hunting you</sub></td>
-    <td width="50%" align="center"><img src="docs/media/desktop-pass-and-play.jpg" width="100%" alt="A 1v1 duel on one screen: one player is the snake, the other the orb"><br><sub><b>Desktop</b> · Pass and play: a 1v1 duel on one screen</sub></td>
-  </tr>
-</table>
-<table>
-  <tr>
     <td width="33%" align="center"><img src="docs/media/web-loading-screen.jpg" width="100%" alt="Web loading screen: the snake grows as the game loads"><br><sub><b>Web</b> · Loading: the snake grows as the game loads</sub></td>
     <td width="33%" align="center"><img src="docs/media/desktop-caught-revive.jpg" width="100%" alt="Caught: your score, stars and a heart to revive"><br><sub><b>Desktop</b> · Caught: score, stars and a heart to revive</sub></td>
     <td width="33%" align="center"><img src="docs/media/desktop-share-card.jpg" width="100%" alt="Share card: your result over the world's painted background"><br><sub><b>Desktop</b> · Share card: your result over the world's art</sub></td>
