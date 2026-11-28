@@ -26,6 +26,16 @@ past it for points, and clear five hand-painted worlds. Or duel a friend live:
 > **For the best picture:** the video was uploaded in 4K. If it looks soft, open
 > **⚙ Settings → Quality** in the YouTube player and pick **1080p or higher**.
 
+**The same game on every screen:** web, desktop and Android, from one codebase.
+
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="docs/media/web-home.jpg" width="100%" alt="Home screen in the browser (Kotlin/Wasm)"><br><sub><b>Web</b> · Kotlin/Wasm in the browser</sub></td>
+    <td width="33%" align="center"><img src="docs/media/desktop-home.jpg" width="100%" alt="Home screen in the desktop app (JVM)"><br><sub><b>Desktop</b> · JVM app on Windows</sub></td>
+    <td width="33%" align="center"><img src="docs/media/mobile-home.jpg" width="100%" alt="Home screen on an Android phone"><br><sub><b>Android</b> · native app on a phone</sub></td>
+  </tr>
+</table>
+
 <table>
   <tr>
     <td width="50%" align="center"><img src="docs/media/desktop-tundra-gameplay.jpg" width="100%" alt="Crystal Tundra: you are the glowing orb, and the snake is hunting you"><br><sub><b>Desktop</b> · Crystal Tundra: you are the orb, the snake is hunting you</sub></td>
@@ -62,16 +72,6 @@ layer:
 | **Android** | Native app (API 26+) | ~300 lines: SoundPool, vibration, share sheet |
 | **Desktop** | JVM app for Windows, macOS, Linux | ~300 lines: Java Sound, window, clipboard sharing |
 | **iOS** | Shared code compiles for iOS in CI | not one of the submitted platforms; not run on a device |
-
-**The same game on every screen:** web, desktop and Android, from one codebase.
-
-<table>
-  <tr>
-    <td width="33%" align="center"><img src="docs/media/web-home.jpg" width="100%" alt="Home screen in the browser (Kotlin/Wasm)"><br><sub><b>Web</b> · Kotlin/Wasm in the browser</sub></td>
-    <td width="33%" align="center"><img src="docs/media/desktop-home.jpg" width="100%" alt="Home screen in the desktop app (JVM)"><br><sub><b>Desktop</b> · JVM app on Windows</sub></td>
-    <td width="33%" align="center"><img src="docs/media/mobile-home.jpg" width="100%" alt="Home screen on an Android phone"><br><sub><b>Android</b> · native app on a phone</sub></td>
-  </tr>
-</table>
 
 ---
 
